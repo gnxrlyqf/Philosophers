@@ -21,3 +21,14 @@ long	ft_atoi(char *str)
 		str++;
 	return (result * sign);
 }
+
+long get_time(void)
+{
+	struct timeval tv;
+
+	if (!gettimeofday(&tv, NULL))
+	{
+		//error
+	}
+	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
+}

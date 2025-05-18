@@ -1,6 +1,8 @@
 {
 	"files.associations": {
 		"bitset": "c",
-		"format": "c"
+		"format": "c",
+		"main.h": "c",
+		"types.h": "c"
 	}
 }

@@ -7,6 +7,7 @@
 # include <stdlib.h>
 # include <stdio.h>
 # include <time.h>
+# include <sys/time.h>
 
 # define BLK "\e[0;30m"
 # define RED "\e[0;31m"
@@ -45,7 +46,10 @@ typedef struct s_philo
 } t_philo;
 
 long	ft_atoi(char *str);
-void	eating(t_data *data, int index);
+void	eating(t_philo *philo);
 void	sleeping(t_data *data, int index);
+void	thinking(int index);
+long	get_time(void);
+void	cleanup(t_data *data, t_philo *philos, pthread_t *threads, int *ret);
 
 #endif
