@@ -1,6 +1,6 @@
 #include <main.h>
 
-long	ft_atoi(char *str)
+long	_atoi(char *str)
 {
 	int		sign;
 	long	result;
@@ -22,20 +22,21 @@ long	ft_atoi(char *str)
 	return (result * sign);
 }
 
-long get_time(void)
+int	parse(char *av)
 {
-	struct timeval tv;
+	int out;
+	char *str;
 
-	if (!gettimeofday(&tv, NULL))
+	str = av;
+	while (*str)
 	{
-		//error
+		if (!(*str >= 48 && *str <= 57))
+			return (-1);
+		str++;
 	}
-	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
-}
-
-int max(int a, int b)
-{
-	if (a > b)
-		return (a);
-	return (b);
+	out = _atoi(av);
+	if (out > INT_MAX || out < INT_MIN)
+		return (-1);
+	// printf("%d\n", out);
+	return ((int)out);
 }

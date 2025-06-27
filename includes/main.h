@@ -8,6 +8,7 @@
 # include <stdio.h>
 # include <time.h>
 # include <sys/time.h>
+# include <string.h>
 
 # define BLK "\e[0;30m"
 # define RED "\e[0;31m"
@@ -29,11 +30,14 @@ typedef enum state
 typedef struct s_data
 {
 	pthread_mutex_t *forks;
+	long start;
 	int count;
 	int tt_eat;
 	int tt_sleep;
 	int tt_die;
 	int eat_min;
+	int running;
+	pthread_mutex_t run;
 } t_data;
 
 typedef struct s_philo
@@ -42,14 +46,17 @@ typedef struct s_philo
 	t_state state;
 	int meal_count;
 	int last_meal;
-	t_data *data;	
+	t_data *data;
 } t_philo;
 
-long	ft_atoi(char *str);
+long	_atoi(char *str);
 void	eating(t_philo *philo);
-void	sleeping(t_data *data, int index);
-void	thinking(int index);
+void	sleeping(t_philo *philo);
+void	thinking(t_philo *philo);
 long	get_time(void);
 void	cleanup(t_data *data, t_philo *philos, pthread_t *threads, int *ret);
+int		parse(char *av);
+int		max(int a, int b);
+
 
 #endif

@@ -21,13 +21,24 @@ t_philo *init_data(char **args, t_data *data)
 {
 	int i;
 
-	data->count = ft_atoi(*args++);
-	data->tt_die = ft_atoi(*args++);
-	data->tt_eat = ft_atoi(*args++);
-	data->tt_sleep = ft_atoi(*args++);
+	data->count = parse(*args++);
+	data->tt_die = parse(*args++);
+	data->tt_eat = parse(*args++);
+	data->tt_sleep = parse(*args++);
+	if (data->count == -1 || data->tt_die == -1
+		|| data->tt_eat == -1 || data->tt_sleep == -1)
+		{
+			write(2, "Invalid input\n", 16);
+			return (NULL);
+		}
 	data->eat_min = -1;
 	if (*args)
-		data->eat_min = ft_atoi(*args);
+	{
+		data->eat_min = parse(*args);
+		if (data->eat_min == -1)
+			return (NULL);
+	}
+	pthread_mutex_init(&data->run, NULL);
 	data->forks = malloc(data->count * sizeof(pthread_mutex_t));
 	i = -1;
 	while (++i < data->count)
@@ -43,19 +54,32 @@ pthread_t *init_threads(int count)
 	return (arr);
 }
 
+int is_running(t_data *data)
+{
+	int running;
+
+	pthread_mutex_lock(&data->run);
+	running = data->running;
+	pthread_mutex_unlock(&data->run);
+	return (running);
+}
+
 void *routine(void *arg)
 {
 	t_philo *philo;
 
 	philo = (t_philo *)arg;
 	philo->last_meal = get_time();
-	while (1)
+	if (philo->index % 2 != 0)
+		usleep(200 + 1500 * (philo->index == philo->data->count - 1 && philo->data->count % 2));
+	while (is_running(philo->data))
 	{
 		eating(philo);
-		sleeping(philo->data, philo->index);
-		thinking(philo->index);
+		sleeping(philo);
+		thinking(philo);
 	}
-}	
+	return (NULL);
+}
 
 int is_dead(t_philo *philo)
 {
@@ -63,54 +87,67 @@ int is_dead(t_philo *philo)
 
 	diff = get_time() - philo->last_meal;
 	if (diff > philo->data->tt_die)
-	{
-		printf("%d\n", diff);
 		return (1);
-	}
 	return (0);
+}
+
+int simulation_over(t_philo *philos)
+{
+	int ate;
+	int i;
+	t_data *data;
+
+	data = philos->data;
+	ate = 0;
+	i = -1;
+	while (++i < data->count)
+	{
+		if (is_dead(philos + i))
+		{
+			printf("%ld - %s%d died%s\n", get_time() - data->start, RED, i, WHT);
+			return (1);
+		}
+		if (data->eat_min != -1 && (*(philos + i)).meal_count == data->eat_min)
+			ate++;
+	}
+	return (ate == data->count);
 }
 
 void *monitor(void *arg)
 {
-	int i;
 	t_philo *philos;
 	t_data *data;
-	int *ret;
 
-	ret = malloc(sizeof(int));
-	*ret = 1;
 	philos = (t_philo *)arg;
 	data = philos->data;
-	i = 0;
 	while (1)
 	{
-		if (is_dead(philos + i))
-		{
-			printf("%ld - %s%d died%s\n", get_time(), RED, i, WHT);
-			return ((void *)ret);
-		}
-		i++;
-		if (i == data->count)
-			i = 0;
+		if (simulation_over(philos))
+			break ;
+		usleep(20);
 	}
-	*ret = 0;	
-	return ((void *)ret);
+	return (NULL);
 }
 
 void simulate(t_data *data, t_philo *philos, pthread_t *threads)
 {
+	pthread_mutex_t running;
 	pthread_t monitor_th;
 	int i;
 	int *ret;
 
+	data->start = get_time();
+	data->running = 1;
 	i = -1;
 	while (++i < data->count)
 		pthread_create(threads + i, NULL, routine, philos + i);
 	pthread_create(&monitor_th, NULL, monitor, philos);
 	pthread_join(monitor_th, (void **)&ret);
-	if (!*ret)
-		while (--i > -1)
-			pthread_join(threads[i], NULL);
+	pthread_mutex_lock(&running);
+	data->running = 0;
+	pthread_mutex_unlock(&running);
+	while (--i > -1)
+		pthread_join(threads[i], NULL);
 	cleanup(data, philos, threads, ret);
 }
 
@@ -133,9 +170,14 @@ int main(int ac, char **av)
 	t_philo *philos;
 	pthread_t *threads;
 
-	if (ac < 4)
+	if (ac < 5 || ac > 6)
+	{
+		write(2, "Invalid input\n", 16);
 		return (1);
+	}
 	philos = init_data(av + 1, &data);
+	if (!philos)
+		return (1);
 	threads = malloc(data.count * sizeof(pthread_t));
 	simulate(&data, philos, threads);
 	return (0);

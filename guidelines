@@ -1,0 +1,5 @@
+// 1. tt_eat >= 60, tt_die >= 60, tt_sleep >= 60
+// 2. tt_die >= tt_eat + tt_sleep + 10
+// 3. if (count % 2 == 0) {tt_die >= tt_eat * 2}
+// 4. if (count % 2 != 0) {tt_die >= tt_eat * 3}
+sed -i 's/\(\\e\|\x1b\)\[[0-9;]*m//g' file
