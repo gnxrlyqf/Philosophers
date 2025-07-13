@@ -1,5 +1,5 @@
 CC = cc
-CFLAGS = -Wall -Wextra -g #-Werror
+CFLAGS = -Wall -Wextra -g -Werror
 INC = -I./includes
 LIB = -lc -lpthread
 SRC = $(wildcard src/*.c)

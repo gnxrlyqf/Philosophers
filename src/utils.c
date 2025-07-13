@@ -1,41 +1,45 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mchetoui <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/13 18:38:15 by mchetoui          #+#    #+#             */
+/*   Updated: 2025/07/13 18:38:17 by mchetoui         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <main.h>
 
-long	ft_atoi(char *str)
+long	get_time(void)
 {
-	int		sign;
-	long	result;
+	struct timeval	tv;
 
-	result = 0;
-	sign = 1;
-	while (*str == ' ' || (*str >= 9 && *str <= 13))
-		str++;
-	if (*str == '-' || *str == '+')
-		sign *= (44 - *str++);
-	while (*str >= '0' && *str <= '9')
-	{
-		result = result * 10 + (*str++ - '0');
-		if (result * sign > INT_MAX || result * sign < INT_MIN)
-			return (result * sign);
-	}
-	while (*str && *str == ' ')
-		str++;
-	return (result * sign);
-}
-
-long get_time(void)
-{
-	struct timeval tv;
-
-	if (!gettimeofday(&tv, NULL))
-	{
-		//error
-	}
+	gettimeofday(&tv, NULL);
 	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
 }
 
-int max(int a, int b)
+int	max(int a, int b)
 {
 	if (a > b)
 		return (a);
 	return (b);
+}
+
+void	_sleep(int time, t_data *data)
+{
+	long	start;
+	long	now;
+	long	diff;
+
+	start = get_time();
+	now = start;
+	diff = 0;
+	while (diff < time && is_running(data))
+	{
+		usleep(100);
+		now = get_time();
+		diff = now - start;
+	}
 }
