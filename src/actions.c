@@ -77,10 +77,9 @@ void	print_action(t_data *data, int index, int action)
 	static char	*color[] = {BLU, YEL, MAG, GRN};
 	long		now;
 
-	if (!is_running(data))
-		return ;
 	now = get_time() - data->start;
 	pthread_mutex_lock(&data->print);
-	printf(actions[action], now, color[action], index + 1, WHT);
+	if (is_running(data))
+		printf(actions[action], now, color[action], index + 1, WHT);
 	pthread_mutex_unlock(&data->print);
 }

@@ -43,3 +43,13 @@ void	_sleep(int time, t_data *data)
 		diff = now - start;
 	}
 }
+
+int	is_running(t_data *data)
+{
+	int	running;
+
+	pthread_mutex_lock(&data->run);
+	running = data->running;
+	pthread_mutex_unlock(&data->run);
+	return (running);
+}

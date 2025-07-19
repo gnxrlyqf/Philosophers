@@ -56,13 +56,13 @@ void	*routine(void *arg)
 	philo = (t_philo *)arg;
 	philo->last_meal = get_time();
 	if (philo->index % 2 != 0)
-	{
 		usleep(500);
-		if (philo->index == philo->data->count - 1 && philo->data->count % 2)
-			usleep(1000);
-	}
-	while (is_running(philo->data))
+	if (philo->index == philo->data->count - 1 && philo->data->count % 2)
+		usleep(1000);
+	while (1)
 	{
+		if (!is_running(philo->data))
+			break ;
 		eating(philo);
 		if (!is_running(philo->data))
 			break ;
@@ -74,12 +74,40 @@ void	*routine(void *arg)
 	return (NULL);
 }
 
-int	is_running(t_data *data)
+int	is_dead(t_philo *philo)
 {
-	int	running;
+	int	diff;
 
-	pthread_mutex_lock(&data->run);
-	running = data->running;
-	pthread_mutex_unlock(&data->run);
-	return (running);
+	diff = get_time() - philo->last_meal;
+	if (diff > philo->data->tt_die)
+	{
+		pthread_mutex_lock(&philo->data->run);
+		philo->data->running = 0;
+		pthread_mutex_unlock(&philo->data->run);
+		return (1);
+	}
+	return (0);
+}
+
+int	simulation_over(t_philo *philos)
+{
+	int		ate;
+	int		i;
+	t_data	*data;
+
+	data = philos->data;
+	ate = 0;
+	i = -1;
+	while (++i < data->count)
+	{
+		if (is_dead(philos + i))
+		{
+			printf("%ld %s%d died%s\n", get_time() - data->start,
+				RED, i + 1, WHT);
+			return (1);
+		}
+		if (data->eat_min != -1 && (*(philos + i)).meal_count == data->eat_min)
+			ate++;
+	}
+	return (ate == data->count);
 }
