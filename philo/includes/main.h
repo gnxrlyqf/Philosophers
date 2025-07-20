@@ -47,7 +47,7 @@ typedef struct s_data
 	int				tt_die;
 	int				eat_min;
 	int				running;
-	pthread_mutex_t monitor;
+	pthread_mutex_t	monitor;
 	pthread_mutex_t	run;
 	pthread_mutex_t	print;
 }	t_data;

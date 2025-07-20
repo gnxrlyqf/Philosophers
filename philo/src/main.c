@@ -35,7 +35,7 @@ void	cleanup(t_data *data, t_philo *philos, pthread_t *threads, int *ret)
 		pthread_mutex_destroy(data->forks + i);
 	pthread_mutex_destroy(&data->run);
 	pthread_mutex_destroy(&data->monitor);
-	pthread_mutex_destroy(&data->print);	
+	pthread_mutex_destroy(&data->print);
 	free(philos);
 	free(data->forks);
 	free(threads);
